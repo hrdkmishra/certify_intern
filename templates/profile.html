@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>User Profile</h1>
+    {% if 'user' in session %}
+        <h2>{{ session['user']['first_name'] }} {{ session['user']['last_name'] }}</h2>
+        <p>Email: {{ session['user']['email'] }}</p>
+        {% if 'company' in session %}
+            <p>Company: {{ session['company']['company_name'] }}</p>
+            <p>Address: {{ session['company']['company_address'] }}</p>
+            <p>City: {{ session['company']['company_city'] }}</p>
+            <p>State: {{ session['company']['company_state'] }}</p>
+            <p>Zipcode: {{ session['company']['company_zipcode'] }}</p>
+            <p>Phone Number: {{ session['company']['company_phone'] }}</p>
+            <p>Email: {{ session['company']['company_email'] }}</p>
+            <p>Website: {{ session['company']['company_website'] }}</p>
+        {% else %}
+            <p>No company profile found.</p>
+        {% endif %}
+        <button id="edit-profile-btn">Edit Profile</button>
+        <div class="profile-form" style="display: none;">
+            <form method="POST" action="{{ url_for('profile', emp_id=session['user']['id']) }}">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    {{ form.company_name.label }}
+                    {{ form.company_name(size=20) }}
+                </div>
+                <div class="form-group">
+                    {{ form.company_address.label }}
+                    {{ form.company_address(size=20) }}
+                </div>
+                <div class="form-group">
+                    {{ form.company_city.label }}
+                    {{ form.company_city(size=20) }}
+                </div>
+                <div class="form-group">
+                    {{ form.company_state.label }}
+                    {{ form.company_state(size=20) }}
+                </div>
+                <div class="form-group">
+                    {{ form.company_zipcode.label }}
+                    {{ form.company_zipcode(size=20) }}
+                </div>
+                <div class="form-group">
+                    {{ form.company_phone.label }}
+                    {{ form.company_phone(size=20) }}
+                </div>
+                <div class="form-group">
+                    {{ form.company_email.label }}
+                    {{ form.company_email(size=20) }}
+                </div>
+                <div class="form-group">
+                    {{ form.company_website.label }}
+                    {{ form.company_website(size=20) }}
+                </div>
+                {{ form.submit() }}
+            </form>
+        </div>
+        <script>
+            document.getElementById("edit-profile-btn").addEventListener("click", function() {
+                const forms = document.getElementsByClassName("profile-form");
+                if (forms.length > 0) {
+                    const form = forms[0];
+                    if (form.style.display === "none") {
+                        form.style.display = "block";
+                    } else {
+                        form.style.display = "none";
+                    }
+                }
+            });
+        </script>
+    {% else %}
+        <p>User profile not found.</p>
+    {% endif %}
+{% endblock %}

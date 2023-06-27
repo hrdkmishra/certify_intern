@@ -1,7 +1,7 @@
 import bcrypt
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
-from forms import SignupForm, LoginForm
+from forms import SignupForm, LoginForm , ProfileEditForm
 
 app = Flask(__name__)
 
@@ -47,7 +47,7 @@ def login():
         cur.close()
 
         if user and bcrypt.checkpw(password.encode('utf-8'), user[4].encode('utf-8')):
-            session['user'] = user, {'first_name': user[2], 'last_name': user[3]}
+            session['user'] = {'id': user[0], 'email': user[1], 'first_name': user[2], 'last_name': user[3]}
             return redirect(url_for('home'))
         else:
             return 'Login failed!'
@@ -86,6 +86,45 @@ def signup():
 def logout():
     session.pop('user', None)  # Remove user information from the session
     return redirect(url_for('home'))
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    form = ProfileEditForm()
+
+    if form.validate_on_submit():
+        # Retrieve the form data and update the user's profile in the database
+        user_id = session['user']['id']
+        company_name = form.company_name.data
+        company_address = form.company_address.data
+        company_city = form.company_city.data
+        company_state = form.company_state.data
+        company_zipcode = form.company_zipcode.data
+        company_phone = form.company_phone.data
+        company_email = form.company_email.data
+        company_website = form.company_website.data
+
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO company (user_id,company_name, company_address, company_city, company_state,"
+                    "company_zipcode,"
+                    "company_phone_number, company_email, company_website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                    (user_id,company_name, company_address, company_city, company_state, company_zipcode, company_phone, company_email, company_website))
+
+        mysql.connection.commit()
+        cur.close()
+
+        session['company'] = {'company_name': company_name, 'company_address': company_address,
+                              'company_city': company_city, 'company_state': company_state, 'company_zipcode': company_zipcode,
+                              'company_phone': company_phone, 'company_email': company_email,
+                              'company_website': company_website}
+
+        return redirect(url_for('profile'))
+
+    # Retrieve the user's existing profile information from the database
+    # Pre-fill the form fields with the retrieved data
+
+    return render_template('profile.html', form=form)
+
 
 
 @app.route('/employer')

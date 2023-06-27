@@ -16,3 +16,16 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
+
+
+class ProfileEditForm(FlaskForm):
+    company_name = StringField('Company Name', validators=[DataRequired()])
+    company_address = StringField('Company Address', validators=[DataRequired()])
+    company_city = StringField('Company City', validators=[DataRequired()])
+    company_state = StringField('Company State', validators=[DataRequired()])
+    company_zipcode = StringField('Company Zip', validators=[DataRequired()])
+    company_phone = StringField('Company Phone', validators=[DataRequired()])
+    company_email = StringField('Company Email', validators=[DataRequired()])
+    company_website = StringField('Company Website', validators=[DataRequired()])
+
+    submit = SubmitField('Update Profile')

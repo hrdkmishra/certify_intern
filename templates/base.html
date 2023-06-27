@@ -3,6 +3,7 @@
 <head>
     <title>My Website</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block css %}{% endblock %}
 </head>
 <body>
     <nav>
@@ -10,6 +11,9 @@
             <li><a href="{{ url_for('home') }}">Home</a></li>
             {% if 'user' in session %}
                 <li class="logout-btn"><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% if not request.path.startswith('/profile') %}
+                    <li class="profile-btn"><a href="{{ url_for('profile', emp_id=session['user']['id']) }}">Profile</a></li>
+                {% endif %}
             {% else %}
                 <li class="login-btn"><a href="{{ url_for('login') }}">Login</a></li>
                 <li class="signup-btn"><a href="{{ url_for('signup') }}">Signup</a></li>

@@ -45,13 +45,15 @@ p {
 
 nav ul li.login-btn,
 nav ul li.signup-btn,
-nav ul li.logout-btn {
+nav ul li.logout-btn,
+nav ul li.profile-btn{
     float: right;
 }
 
 nav ul li.login-btn a,
 nav ul li.signup-btn a,
-nav ul li.logout-btn a{
+nav ul li.logout-btn a,
+nav ul li.profile-btn a{
     background-color: #333;
     color: #fff;
     padding: 8px 12px;
@@ -61,7 +63,8 @@ nav ul li.logout-btn a{
 
 nav ul li.login-btn a:hover,
 nav ul li.signup-btn a:hover,
-nav ul li.logout-btn a:hover{
+nav ul li.logout-btn a:hover,
+nav ul li.profile-btn a:hover{
     background-color: #555;
 }
 
@@ -181,4 +184,59 @@ nav ul li.logout-btn a:hover{
     background-color: #555;
 }
 
+
+/*editprofile css*/
+
+.profile-form {
+    margin: 50px auto;
+    max-width: 400px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+}
+
+
+.profile-form h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.profile-form .form-group {
+    margin-bottom: 15px;
+}
+
+.profile-form .form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.profile-form .form-group input[type="text"],
+.profile-form .form-group input[type="email"],
+.profile-form .form-group input[type="password"],
+.profile-form .form-group input[type="tel"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
+
+.profile-form button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.profile-form button[type="submit"]:hover {
+    background-color: #555;
+}
+/* Profile Form Styles */
 
