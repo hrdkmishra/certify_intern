@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Welcome to my website!</h1>
+    {% if session['user'] %}
+        <h1>Welcome to my website, {{ (session['user']['first_name'] + (" " + session['user']['last_name'] if session['user']['last_name'] else "") + "!").rstrip() }}</h1>
+    {% else %}
+        <h1>Welcome to my website!</h1>
+    {% endif %}
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec gravida mauris id finibus sagittis. Curabitur non justo vitae tortor laoreet efficitur. Nullam non risus ac libero pellentesque congue.</p>
 {% endblock %}

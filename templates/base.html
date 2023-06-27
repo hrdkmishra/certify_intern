@@ -8,8 +8,12 @@
     <nav>
         <ul>
             <li><a href="{{ url_for('home') }}">Home</a></li>
-            <li class="login-btn"><a href="{{ url_for('login') }}">Login</a></li>
-            <li class="signup-btn"><a href="{{ url_for('signup') }}">Signup</a></li>
+            {% if 'user' in session %}
+                <li class="logout-btn"><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+                <li class="login-btn"><a href="{{ url_for('login') }}">Login</a></li>
+                <li class="signup-btn"><a href="{{ url_for('signup') }}">Signup</a></li>
+            {% endif %}
         </ul>
     </nav>
 

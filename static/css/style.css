@@ -44,12 +44,14 @@ p {
 /*login and signup css*/
 
 nav ul li.login-btn,
-nav ul li.signup-btn {
+nav ul li.signup-btn,
+nav ul li.logout-btn {
     float: right;
 }
 
 nav ul li.login-btn a,
-nav ul li.signup-btn a {
+nav ul li.signup-btn a,
+nav ul li.logout-btn a{
     background-color: #333;
     color: #fff;
     padding: 8px 12px;
@@ -58,7 +60,8 @@ nav ul li.signup-btn a {
 }
 
 nav ul li.login-btn a:hover,
-nav ul li.signup-btn a:hover {
+nav ul li.signup-btn a:hover,
+nav ul li.logout-btn a:hover{
     background-color: #555;
 }
 
@@ -177,3 +180,5 @@ nav ul li.signup-btn a:hover {
 .signup-form button[type="submit"]:hover {
     background-color: #555;
 }
+
+
