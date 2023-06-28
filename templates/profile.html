@@ -19,7 +19,7 @@
         {% endif %}
         <button id="edit-profile-btn">Edit Profile</button>
         <div class="profile-form" style="display: none;">
-            <form method="POST" action="{{ url_for('profile', emp_id=session['user']['id']) }}">
+            <form method="POST" action="{{ url_for('profile', id=session['user']['id']) }}">
                 {{ form.csrf_token }}
                 <div class="form-group">
                     {{ form.company_name.label }}

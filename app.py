@@ -1,7 +1,7 @@
 import bcrypt
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
-from forms import SignupForm, LoginForm , ProfileEditForm
+from forms import SignupForm, LoginForm, ProfileEditForm, InternForm
 
 app = Flask(__name__)
 
@@ -95,6 +95,7 @@ def profile():
     if form.validate_on_submit():
         # Retrieve the form data and update the user's profile in the database
         user_id = session['user']['id']
+
         company_name = form.company_name.data
         company_address = form.company_address.data
         company_city = form.company_city.data
@@ -107,14 +108,21 @@ def profile():
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO company (user_id,company_name, company_address, company_city, company_state,"
                     "company_zipcode,"
-                    "company_phone_number, company_email, company_website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                    (user_id,company_name, company_address, company_city, company_state, company_zipcode, company_phone, company_email, company_website))
+                    "company_phone_number, company_email, company_website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    (
+                        user_id, company_name, company_address, company_city, company_state, company_zipcode,
+                        company_phone,
+                        company_email, company_website))
 
         mysql.connection.commit()
+
+        # recently added data in a variable
+
         cur.close()
 
         session['company'] = {'company_name': company_name, 'company_address': company_address,
-                              'company_city': company_city, 'company_state': company_state, 'company_zipcode': company_zipcode,
+                              'company_city': company_city, 'company_state': company_state,
+                              'company_zipcode': company_zipcode,
                               'company_phone': company_phone, 'company_email': company_email,
                               'company_website': company_website}
 
@@ -125,6 +133,42 @@ def profile():
 
     return render_template('profile.html', form=form)
 
+
+@app.route('/intern', methods=['GET', 'POST'])
+def intern():
+    form = InternForm()
+
+    # Fetch interns data from the database
+    cur = mysql.connection.cursor()
+    company_id = cur.execute("SELECT id FROM company WHERE user_id = %s", [session['user']['id']])
+    cur.execute("SELECT * FROM interns WHERE company_id = %s", [company_id])
+    interns = cur.fetchall()
+    cur.close()
+
+    if form.validate_on_submit():
+        # Retrieve the form data and save the intern details in the database
+        first_name = form.first_name.data
+        last_name = form.last_name.data
+        designation = form.designation.data
+        email = form.email.data
+        start_date = form.start_date.data
+        end_date = form.end_date.data
+
+        cur = mysql.connection.cursor()
+
+        cur.execute("INSERT INTO interns (company_id, first_name, last_name, designation, email, start_date, end_date) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    (company_id, first_name, last_name, designation, email, start_date, end_date))
+        mysql.connection.commit()
+        cur.close()
+
+        # Refresh the interns data from the database
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM interns WHERE company_id = %s", [company_id])
+        interns = cur.fetchall()
+        cur.close()
+
+    return render_template('intern.html', form=form, interns=interns)
 
 
 @app.route('/employer')
