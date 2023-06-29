@@ -173,7 +173,7 @@ def intern():
 
 @app.route('/employer')
 def employee():
-    return 'Employee Page'
+    return 'git test'
 
 
 if __name__ == '__main__':
