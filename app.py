@@ -1,11 +1,11 @@
 import bcrypt
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, redirect, url_for, session
 from flask_mysqldb import MySQL
 from forms import SignupForm, LoginForm, ProfileEditForm, InternForm
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = '2394239482048209fdsfew3hh'
+app.config['SECRET_KEY'] = '23942394820482093'
 
 # MySQL configurations
 app.config['MYSQL_HOST'] = 'localhost'
@@ -42,6 +42,7 @@ def login():
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM users WHERE email = %s", [email])
         user = cur.fetchone()
+
         # print(user) = (1, 'admin@website.com', 'admin', '', '$2b$12$9.xkOBOu8gvYWDrWzcj56er/j029XsGBfWzvJLQIJXiajic53LKaK')
         # the data user return is a tuple
         cur.close()
@@ -64,7 +65,7 @@ def signup():
         first_name = form.first_name.data
         last_name = form.last_name.data
         password = form.password.data
-        confirm_password = form.confirm_password.data
+        #confirm_password = form.confirm_password.data
 
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
