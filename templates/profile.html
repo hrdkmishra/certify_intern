@@ -2,23 +2,23 @@
 
 {% block content %}
     <h1>User Profile</h1>
-    {% if 'user' in session %}
+     {% if 'user' in session %}
         <h2>{{ session['user']['first_name'] }} {{ session['user']['last_name'] }}</h2>
         <p>Email: {{ session['user']['email'] }}</p>
-        {% if 'company' in session %}
-            <p>Company: {{ session['company']['company_name'] }}</p>
-            <p>Address: {{ session['company']['company_address'] }}</p>
-            <p>City: {{ session['company']['company_city'] }}</p>
-            <p>State: {{ session['company']['company_state'] }}</p>
-            <p>Zipcode: {{ session['company']['company_zipcode'] }}</p>
-            <p>Phone Number: {{ session['company']['company_phone'] }}</p>
-            <p>Email: {{ session['company']['company_email'] }}</p>
-            <p>Website: {{ session['company']['company_website'] }}</p>
+        {% if 'company_data' in session %}
+            <p>Company: {{ company_data[1] }}</p>
+            <p>Address: {{ company_data[2] }}</p>
+            <p>City: {{ company_data[3] }}</p>
+            <p>State: {{ company_data[4] }}</p>
+            <p>Zipcode: {{ company_data[5] }}</p>
+            <p>Phone Number: {{ company_data[6] }}</p>
+            <p>Email: {{ company_data[7] }}</p>
+            <p>Website: {{ company_data[8] }}</p>
         {% else %}
             <p>No company profile found.</p>
         {% endif %}
         <button id="edit-profile-btn">Edit Profile</button>
-        <div class="profile-form" style="display: none;">
+        <div class="profile-form" style="   display: none;">
             <form method="POST" action="{{ url_for('profile', id=session['user']['id']) }}">
                 {{ form.csrf_token }}
                 <div class="form-group">

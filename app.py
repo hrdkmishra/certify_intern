@@ -1,17 +1,18 @@
-import bcrypt
+import bcrypt, datetime, qrcode, uuid
 from flask import Flask, render_template, redirect, url_for, session
 from flask_mysqldb import MySQL
 from forms import SignupForm, LoginForm, ProfileEditForm, InternForm
 
+
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = '23942394820482093'
+app.config["SECRET_KEY"] = "23942394820482093"
 
 # MySQL configurations
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'flask'
+app.config["MYSQL_HOST"] = "localhost"
+app.config["MYSQL_USER"] = "root"
+app.config["MYSQL_PASSWORD"] = ""
+app.config["MYSQL_DB"] = "flask"
 mysql = MySQL(app)
 
 
@@ -26,12 +27,12 @@ mysql = MySQL(app)
 #         print("An error occurred while connecting to MySQL:", e)
 
 
-@app.route('/')
+@app.route("/")
 def home():
-    return render_template('index.html')
+    return render_template("index.html")
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
 
@@ -47,16 +48,21 @@ def login():
         # the data user return is a tuple
         cur.close()
 
-        if user and bcrypt.checkpw(password.encode('utf-8'), user[4].encode('utf-8')):
-            session['user'] = {'id': user[0], 'email': user[1], 'first_name': user[2], 'last_name': user[3]}
-            return redirect(url_for('home'))
+        if user and bcrypt.checkpw(password.encode("utf-8"), user[4].encode("utf-8")):
+            session["user"] = {
+                "id": user[0],
+                "email": user[1],
+                "first_name": user[2],
+                "last_name": user[3],
+            }
+            return redirect(url_for("home"))
         else:
-            return 'Login failed!'
+            return "Login failed!"
 
-    return render_template('login.html', form=form)
+    return render_template("login.html", form=form)
 
 
-@app.route('/signup', methods=['GET', 'POST'])
+@app.route("/signup", methods=["GET", "POST"])
 def signup():
     form = SignupForm()
 
@@ -65,37 +71,47 @@ def signup():
         first_name = form.first_name.data
         last_name = form.last_name.data
         password = form.password.data
-        #confirm_password = form.confirm_password.data
+        # confirm_password = form.confirm_password.data
 
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
         cur = mysql.connection.cursor()
         cur.execute(
             "INSERT INTO users (email, first_name, last_name, password) VALUES (%s, %s, %s, %s)",
-            (email, first_name, last_name, hashed_password)
+            (email, first_name, last_name, hashed_password),
         )
         mysql.connection.commit()
         cur.close()
 
-        session['user'] = {'email': email, 'first_name': first_name, 'last_name': last_name}
-        return redirect(url_for('home'))
+        session["user"] = {
+            "email": email,
+            "first_name": first_name,
+            "last_name": last_name,
+        }
+        return redirect(url_for("home"))
 
-    return render_template('signup.html', form=form)
+    return render_template("signup.html", form=form)
 
 
-@app.route('/logout')
+@app.route("/logout")
 def logout():
-    session.pop('user', None)  # Remove user information from the session
-    return redirect(url_for('home'))
+    session.pop("user", None)  # Remove user information from the session
+    return redirect(url_for("home"))
 
 
-@app.route('/profile', methods=['GET', 'POST'])
+@app.route("/profile", methods=["GET", "POST"])
 def profile():
     form = ProfileEditForm()
 
+    user_id = session["user"]["id"]
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM company WHERE user_id = %s", [user_id])
+    company_data = cur.fetchone()
+    cur.close()
+
     if form.validate_on_submit():
         # Retrieve the form data and update the user's profile in the database
-        user_id = session['user']['id']
+        user_id = session["user"]["id"]
 
         company_name = form.company_name.data
         company_address = form.company_address.data
@@ -107,43 +123,64 @@ def profile():
         company_website = form.company_website.data
 
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO company (user_id,company_name, company_address, company_city, company_state,"
-                    "company_zipcode,"
-                    "company_phone_number, company_email, company_website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                    (
-                        user_id, company_name, company_address, company_city, company_state, company_zipcode,
-                        company_phone,
-                        company_email, company_website))
-
+        cur.execute(
+            "INSERT INTO company (user_id, company_name, company_address, company_city, company_state,company_zipcode, company_phone_number, company_email, company_website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                (
+                user_id,
+                company_name,
+                company_address,
+                company_city,
+                company_state,
+                company_zipcode,
+                company_phone,
+                company_email,
+                company_website,
+            ),
+        )
         mysql.connection.commit()
-
-        # recently added data in a variable
-
         cur.close()
 
-        session['company'] = {'company_name': company_name, 'company_address': company_address,
-                              'company_city': company_city, 'company_state': company_state,
-                              'company_zipcode': company_zipcode,
-                              'company_phone': company_phone, 'company_email': company_email,
-                              'company_website': company_website}
+        # Fetch the updated company data from the database
+        session["company"] = {
+            "company_name": company_name,
+            "company_address": company_address,
+            "company_city": company_city,
+            "company_state": company_state,
+            "company_zipcode": company_zipcode,
+            "company_phone": company_phone,
+            "company_email": company_email,
+            "company_website": company_website,
+        }
 
-        return redirect(url_for('profile'))
+        return redirect(url_for("profile"))
 
-    # Retrieve the user's existing profile information from the database
-    # Pre-fill the form fields with the retrieved data
-
-    return render_template('profile.html', form=form)
+    return render_template("profile.html", form=form, company_data=company_data)
 
 
-@app.route('/intern', methods=['GET', 'POST'])
+def generateQrcode(qrcode_id):
+    # Generate QR code image
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    qr.add_data(qrcode_id)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+    # Save the QR code image
+    qr_img.save(f"static/qr_codes/{qrcode_id}.png")
+
+
+@app.route("/intern", methods=["GET", "POST"])
 def intern():
     form = InternForm()
+    user_id = session["user"]["id"]
 
     # Fetch interns data from the database
     cur = mysql.connection.cursor()
-    company_id = cur.execute("SELECT id FROM company WHERE user_id = %s", [session['user']['id']])
-    cur.execute("SELECT * FROM interns WHERE company_id = %s", [company_id])
+
+    cur.execute("SELECT id FROM company WHERE user_id = %s", [user_id])
+    company_id = cur.fetchone()[0]
+    print(company_id)
+    cur.execute("SELECT * FROM interns WHERE user_id = %s", [user_id])
     interns = cur.fetchall()
+    print(interns)
     cur.close()
 
     if form.validate_on_submit():
@@ -155,27 +192,40 @@ def intern():
         start_date = form.start_date.data
         end_date = form.end_date.data
 
+        # Generate a unique QR code ID
+        qrcode_id = str(uuid.uuid4())
+
+        # Generate QR code and save it
+        generateQrcode(qrcode_id)
+
         cur = mysql.connection.cursor()
 
-        cur.execute("INSERT INTO interns (company_id, first_name, last_name, designation, email, start_date, end_date) "
-                    "VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                    (company_id, first_name, last_name, designation, email, start_date, end_date))
+        cur.execute(
+            "INSERT INTO interns (user_id,company_id, first_name, last_name, designation, email, start_date, end_date, qrcode_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (
+                user_id,
+                company_id,
+                first_name,
+                last_name,
+                designation,
+                email,
+                start_date,
+                end_date,
+                qrcode_id,
+            ),
+        )
         mysql.connection.commit()
         cur.close()
 
-        # Refresh the interns data from the database
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM interns WHERE company_id = %s", [company_id])
-        interns = cur.fetchall()
-        cur.close()
+        return redirect(url_for("intern"))
 
-    return render_template('intern.html', form=form, interns=interns)
+    return render_template("intern.html", form=form, interns=interns)
 
 
-@app.route('/employer')
+@app.route("/employer")
 def employee():
-    return 'git test'
+    return "git test"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
