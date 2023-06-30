@@ -1,7 +1,8 @@
-import bcrypt, datetime, qrcode, uuid
-from flask import Flask, render_template, redirect, url_for, session
+import bcrypt, datetime, qrcode, uuid, os, cv2
+from flask import Flask, render_template, redirect, url_for, session, jsonify, request
 from flask_mysqldb import MySQL
 from forms import SignupForm, LoginForm, ProfileEditForm, InternForm
+from werkzeug.utils import secure_filename
 
 
 app = Flask(__name__)
@@ -107,7 +108,13 @@ def profile():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM company WHERE user_id = %s", [user_id])
     company_data = cur.fetchone()
+    session["company_data"] = company_data
     cur.close()
+
+    if "company_data" in session:
+        company_data = session["company_data"]
+    else:
+        company_data = None
 
     if form.validate_on_submit():
         # Retrieve the form data and update the user's profile in the database
@@ -124,8 +131,7 @@ def profile():
 
         cur = mysql.connection.cursor()
         cur.execute(
-            "INSERT INTO company (user_id, company_name, company_address, company_city, company_state,company_zipcode, company_phone_number, company_email, company_website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                (
+            "INSERT INTO company (user_id, company_name, company_address, company_city, company_state,company_zipcode, company_phone_number, company_email, company_website) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"(
                 user_id,
                 company_name,
                 company_address,
@@ -220,6 +226,59 @@ def intern():
         return redirect(url_for("intern"))
 
     return render_template("intern.html", form=form, interns=interns)
+
+
+# upload qrcode in index.html
+UPLOAD_FOLDER = "static/uploads/qrcode_files"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def get_qrcode_id_from_file(file_path):
+    # Read the QR code image
+    img = cv2.imread(file_path)
+    detector = cv2.QRCodeDetector()
+    data, bbox, straight_qrcode = detector.detectAndDecode(img)
+    print(data)
+    return data
+
+
+@app.route("/scan_qr_code", methods=["POST"])
+def scan_qr_code():
+
+    if "qr_code_file" not in request.files:
+        return jsonify({"error": "No QR code file uploaded"})
+
+    qr_code_file = request.files["qr_code_file"]
+
+    if qr_code_file.filename == "":
+        return jsonify({"error": "No selected file"})
+
+    if qr_code_file and allowed_file(qr_code_file.filename):
+        filename = secure_filename(qr_code_file.filename)
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        qr_code_file.save(file_path)
+
+        qrcode_id = get_qrcode_id_from_file(file_path)
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM interns WHERE qrcode_id = %s", [qrcode_id])
+        intern_data = cur.fetchone()
+        print(intern_data)
+        cur.close()
+
+        if intern_data:
+            # QR code found in the database, return the response
+            response = render_template("response.html", intern_data=intern_data)
+            return response
+        else:
+            return jsonify({"error": "QR code not found in the database"})
+
+    return jsonify({"error": "Invalid request"})
 
 
 @app.route("/employer")

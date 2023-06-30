@@ -24,6 +24,8 @@ nav ul li {
 nav ul li a {
     color: #fff;
     text-decoration: none;
+    /*increase font weight*/
+    font-weight: bold;
 }
 
 .content {
@@ -43,20 +45,12 @@ p {
 
 /*login and signup css*/
 
-nav ul li.login-btn,
-nav ul li.signup-btn,
-nav ul li.logout-btn,
-nav ul li.profile-btn,
-nav ul li.intern-btn
+nav ul li.same-btn
 {
     float: right;
 }
 
-nav ul li.login-btn a,
-nav ul li.signup-btn a,
-nav ul li.logout-btn a,
-nav ul li.profile-btn a,
-nav ul li.intern-btn a{
+nav ul li.same-btn a{
     background-color: #333;
     color: #fff;
     padding: 8px 12px;
@@ -64,12 +58,14 @@ nav ul li.intern-btn a{
     text-decoration: none;
 }
 
-nav ul li.login-btn a:hover,
-nav ul li.signup-btn a:hover,
-nav ul li.logout-btn a:hover,
-nav ul li.profile-btn a:hover,
-nav ul li.intern-btn a:hover{
+nav ul li.same-btn a:hover{
     background-color: #555;
+}
+
+/*night mode css*/
+body.dark-mode {
+    background-color: #333;
+    color: #fff;
 }
 
 /*login.html css*/
@@ -128,6 +124,8 @@ nav ul li.intern-btn a:hover{
 .login-form button[type="submit"]:hover {
     background-color: #555;
 }
+
+
 
 
 /*signup css*/

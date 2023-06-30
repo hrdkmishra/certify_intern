@@ -1,33 +1,51 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>My Website</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
     {% block css %}{% endblock %}
-</head>
-<body>
+  </head>
+  <body>
     <nav>
-        <ul>
-            <li><a href="{{ url_for('home') }}">Home</a></li>
-            {% if 'user' in session %}
-                <li class="logout-btn"><a href="{{ url_for('logout') }}">Logout</a></li>
-                {% if not request.path.startswith('/profile') %}
-                    <li class="profile-btn"><a href="{{ url_for('profile', emp_id=session['user']['id']) }}">Profile</a></li>
-                {% endif %}
-                {% if not request.path.startswith('/intern') %}
-                    <li class="intern-btn"><a href="{{ url_for('intern') }}">Intern</a></li>
-                {% endif %}
-            {% else %}
-                <li class="login-btn"><a href="{{ url_for('login') }}">Login</a></li>
-                <li class="signup-btn"><a href="{{ url_for('signup') }}">Signup</a></li>
-            {% endif %}
-        </ul>
+      <ul>
+        <li><a href="{{ url_for('home') }}">Home</a></li>
+        {% if 'user' in session %}
+        <li class="same-btn"><a href="{{ url_for('logout') }}">Logout</a></li>
+        {% if not request.path.startswith('/profile') %}
+        <li class="same-btn">
+          <a href="{{ url_for('profile', emp_id=session['user']['id']) }}"
+            >Profile</a
+          >
+        </li>
+        {% endif %} {% if not request.path.startswith('/intern') %}
+        <li class="same-btn"><a href="{{ url_for('intern') }}">Intern</a></li>
+        {% endif %}
+        <li id="night-mode-btn" class="same-btn" onclick="toggleNightMode()">
+          <a href="#"> Night Mode </a>
+        </li>
+        {% else %}
+        <li class="same-btn"><a href="{{ url_for('login') }}">Login</a></li>
+        <li class="same-btn"><a href="{{ url_for('signup') }}">Signup</a></li>
+        {% endif %}
+      </ul>
     </nav>
 
-    <div class="content">
-        {% block content %}
-        {% endblock %}
-    </div>
+    <div class="content">{% block content %} {% endblock %}</div>
+  </body>
+  <script>
+    function toggleNightMode() {
+      let body = document.body;
+      body.classList.toggle("dark-mode");
 
-</body>
+      let nightModeLink = document.querySelector("#night-mode-btn a");
+      if (body.classList.contains("dark-mode")) {
+        nightModeLink.innerHTML = "Day Mode";
+      } else {
+        nightModeLink.innerHTML = "Night Mode";
+      }
+    }
+  </script>
 </html>

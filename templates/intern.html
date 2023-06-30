@@ -17,7 +17,7 @@
       {{ form.email.label }} {{ form.email(size=20) }}
     </div>
     <div class="form-group">
-        {{ form.start_date.label }} {{ form.start_date(size=20)}}
+      {{ form.start_date.label }} {{ form.start_date(size=20)}}
     </div>
     <div class="form-group">
       {{ form.end_date.label }} {{ form.end_date(size=20)}}
@@ -27,18 +27,20 @@
 </div>
 
 {% if interns %}
-    <h2>Interns</h2>
-    <div class="interns">
-        {% for intern in interns %}
-          <div class="intern-box">
-            <h3>{{ intern[3] }} {{ intern[4] }}</h3>
-            <p><strong>Designation:</strong> {{ intern[5] }}</p>
-            <p><strong>Email:</strong> {{ intern[6] }}</p>
-            <p><strong>Start Date:</strong> {{ intern[7] }}</p>
-            <p><strong>End Date:</strong> {{ intern[8] }}</p>
-            <img src="{{ url_for('static', filename='qr_codes/' + intern[9] + '.png') }}" alt="QR Code">
-          </div>
-        {% endfor %}
-    </div>
-{% endif %}
-{% endblock %}
+<h2>Interns</h2>
+<div class="interns">
+  {% for intern in interns %}
+  <div class="intern-box">
+    <h3>{{ intern[3] }} {{ intern[4] }}</h3>
+    <p><strong>Designation:</strong> {{ intern[5] }}</p>
+    <p><strong>Email:</strong> {{ intern[6] }}</p>
+    <p><strong>Start Date:</strong> {{ intern[7] }}</p>
+    <p><strong>End Date:</strong> {{ intern[8] }}</p>
+    <img
+      src="{{ url_for('static', filename='qr_codes/' + intern[9] + '.png') }}"
+      alt="QR Code"
+    />
+  </div>
+  {% endfor %}
+</div>
+{% endif %} {% endblock %}

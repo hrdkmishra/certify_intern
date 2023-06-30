@@ -1,10 +1,48 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %} {% if session['user'] %}
+<h1>
+  Welcome to my website, {{ (session['user']['first_name'] + (" " +
+  session['user']['last_name'] if session['user']['last_name'] else "") +
+  "!").rstrip() }}
+</h1>
+{% else %}
+<h1>Welcome to my website!</h1>
+{% endif %}
+<p>
+  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec gravida mauris
+  id finibus sagittis. Curabitur non justo vitae tortor laoreet efficitur.
+  Nullam non risus ac libero pellentesque congue.
+</p>
+<form id="uploadForm" enctype="multipart/form-data">
+  <input type="file" name="qr_code_file" id="qrCodeFileInput" />
+  <button type="submit">Upload QR Code</button>
+</form>
 
-{% block content %}
-    {% if session['user'] %}
-        <h1>Welcome to my website, {{ (session['user']['first_name'] + (" " + session['user']['last_name'] if session['user']['last_name'] else "") + "!").rstrip() }}</h1>
-    {% else %}
-        <h1>Welcome to my website!</h1>
-    {% endif %}
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec gravida mauris id finibus sagittis. Curabitur non justo vitae tortor laoreet efficitur. Nullam non risus ac libero pellentesque congue.</p>
+<div id="responseContainer">
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+  $(document).ready(function () {
+    $("#uploadForm").submit(function (e) {
+      e.preventDefault(); // Prevent the default form submission
+
+      let formData = new FormData(this); // Create a new FormData object from the form
+      $.ajax({
+        url: "/scan_qr_code", // The Flask route to handle the file upload and processing
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+          // Display the response in the responseContainer div
+          $("#responseContainer").html(response);
+        },
+        error: function (xhr, status, error) {
+          console.log(error); // Handle any errors that occur during the AJAX request
+        },
+      });
+    });
+  });
+</script>
+
 {% endblock %}
