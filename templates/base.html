@@ -6,12 +6,14 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
     />
+
     {% block css %}{% endblock %}
   </head>
   <body>
     <nav>
       <ul>
         <li><a href="{{ url_for('home') }}">Home</a></li>
+
         {% if 'user' in session %}
         <li class="same-btn"><a href="{{ url_for('logout') }}">Logout</a></li>
         {% if not request.path.startswith('/profile') %}
@@ -22,14 +24,13 @@
         </li>
         {% endif %} {% if not request.path.startswith('/intern') %}
         <li class="same-btn"><a href="{{ url_for('intern') }}">Intern</a></li>
+        {% endif %} {% else %}
+        <li class="same-btn"><a href="{{ url_for('login') }}">Login</a></li>
+        <li class="same-btn"><a href="{{ url_for('signup') }}">Signup</a></li>
         {% endif %}
         <li id="night-mode-btn" class="same-btn" onclick="toggleNightMode()">
           <a href="#"> Night Mode </a>
         </li>
-        {% else %}
-        <li class="same-btn"><a href="{{ url_for('login') }}">Login</a></li>
-        <li class="same-btn"><a href="{{ url_for('signup') }}">Signup</a></li>
-        {% endif %}
       </ul>
     </nav>
 
