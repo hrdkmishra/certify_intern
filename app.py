@@ -302,9 +302,7 @@ def scan_qr_code():
     return jsonify({"error": "Invalid request"})
 
 
-@app.route("/employer")
-def employee():
-    return "git test"
+
 
 
 if __name__ == "__main__":
