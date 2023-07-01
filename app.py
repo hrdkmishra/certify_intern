@@ -1,8 +1,10 @@
-import bcrypt, datetime, qrcode, uuid, os, cv2
+import bcrypt, datetime, qrcode, uuid, os, cv2, fitz, numpy as np
 from flask import Flask, render_template, redirect, url_for, session, jsonify, request
 from flask_mysqldb import MySQL
 from forms import SignupForm, LoginForm, ProfileEditForm, InternForm
 from werkzeug.utils import secure_filename
+from pyzbar.pyzbar import decode
+from PIL import Image
 
 
 app = Flask(__name__)
@@ -230,7 +232,7 @@ def intern():
 
 # upload qrcode in index.html
 UPLOAD_FOLDER = "static/uploads/qrcode_files"
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -240,9 +242,29 @@ def allowed_file(filename):
 
 
 def get_qrcode_id_from_file(file_path):
-    # Read the QR code image
-    img = cv2.imread(file_path)
+    # Read the PDF file
+    if file_path.endswith(".pdf"):
+        pdf_file = fitz.open(file_path)
+        # Extract the first page as an image
+        first_page = pdf_file[0]
+        pix = first_page.get_pixmap()
+
+        # Convert Fitz pixmap to PIL image
+        pil_image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+
+        # Convert PIL image to NumPy array
+        img_pil_to_np = np.array(pil_image)
+
+        # Convert color space from RGB to BGR
+        img = cv2.cvtColor(img_pil_to_np, cv2.COLOR_RGB2BGR)
+
+    else:
+        # Read the image file
+        img = cv2.imread(file_path)
+
+    # Initialize the cv2 QRCodeDetector
     detector = cv2.QRCodeDetector()
+    # Detect the QR code in the image
     data, bbox, straight_qrcode = detector.detectAndDecode(img)
     print(data)
     return data
@@ -250,7 +272,6 @@ def get_qrcode_id_from_file(file_path):
 
 @app.route("/scan_qr_code", methods=["POST"])
 def scan_qr_code():
-
     if "qr_code_file" not in request.files:
         return jsonify({"error": "No QR code file uploaded"})
 

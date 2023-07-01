@@ -1,5 +1,3 @@
-import datetime
-
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, DateField
 from wtforms.validators import DataRequired, Email, EqualTo, InputRequired, Length
@@ -42,6 +40,6 @@ class InternForm(FlaskForm):
     last_name = StringField("Last Name", validators=[DataRequired()])
     designation = StringField("Designation", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired(), Email()])
-    start_date = DateField("Start Date",  validators=[DataRequired()])
+    start_date = DateField("Start Date", validators=[DataRequired()])
     end_date = DateField("End Date", validators=[DataRequired()])
     submit = SubmitField("Add Intern")
