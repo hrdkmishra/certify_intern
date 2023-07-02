@@ -173,7 +173,7 @@ def profile():
 
 def generateQrcode(qrcode_id):
     # Generate QR code image
-    url = f"{app_url}/redirect_qrcode_scan/{qrcode_id}"
+    url = f"127.0.0.1/redirect_qrcode_scan/{qrcode_id}"
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(url)
     qr.make(fit=True)
@@ -235,7 +235,7 @@ def intern():
 
         return redirect(url_for("intern"))
 
-    #return render_template("intern.html", form=form, interns=interns,app_url=app_url)
+    # return render_template("intern.html", form=form, interns=interns,app_url=app_url)
     return render_template("intern.html", form=form, interns=interns)
 
 
@@ -341,5 +341,6 @@ def experience_letter(qrcode_id):
         return jsonify({"error": "Intern data not found"})
 
 
+
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True)
