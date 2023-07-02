@@ -5,17 +5,23 @@ from forms import SignupForm, LoginForm, ProfileEditForm, InternForm
 from werkzeug.utils import secure_filename
 from pyzbar.pyzbar import decode
 from PIL import Image
+from urllib.parse import urlencode
+from dotenv import load_dotenv
+
+load_dotenv()
+app_url = os.environ.get('APP_URL')
+#secret_key = os.environ.get('SECRET_KEY')
 
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = "23942394820482093"
+app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
 
 # MySQL configurations
-app.config["MYSQL_HOST"] = "localhost"
-app.config["MYSQL_USER"] = "root"
-app.config["MYSQL_PASSWORD"] = ""
-app.config["MYSQL_DB"] = "flask"
+app.config["MYSQL_HOST"] = os.environ.get('MYSQL_HOST')
+app.config["MYSQL_USER"] = os.environ.get('MYSQL_USER')
+app.config["MYSQL_PASSWORD"] = os.environ.get('MYSQL_PASSWORD')
+app.config["MYSQL_DB"] = os.environ.get('MYSQL_DB')
 mysql = MySQL(app)
 
 
@@ -167,8 +173,9 @@ def profile():
 
 def generateQrcode(qrcode_id):
     # Generate QR code image
+    url = f"{app_url}/redirect_qrcode_scan/{qrcode_id}"
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
-    qr.add_data(qrcode_id)
+    qr.add_data(url)
     qr.make(fit=True)
     qr_img = qr.make_image(fill_color="black", back_color="white")
     # Save the QR code image
@@ -185,10 +192,10 @@ def intern():
 
     cur.execute("SELECT id FROM company WHERE user_id = %s", [user_id])
     company_id = cur.fetchone()[0]
-    print(company_id)
+    # print(company_id)
     cur.execute("SELECT * FROM interns WHERE user_id = %s", [user_id])
     interns = cur.fetchall()
-    print(interns)
+    # print(interns)
     cur.close()
 
     if form.validate_on_submit():
@@ -202,6 +209,7 @@ def intern():
 
         # Generate a unique QR code ID
         qrcode_id = str(uuid.uuid4())
+        print("http://:5000/redirect_qrcode_scan/" + qrcode_id)
 
         # Generate QR code and save it
         generateQrcode(qrcode_id)
@@ -227,14 +235,15 @@ def intern():
 
         return redirect(url_for("intern"))
 
+    #return render_template("intern.html", form=form, interns=interns,app_url=app_url)
     return render_template("intern.html", form=form, interns=interns)
 
 
 # upload qrcode in index.html
-UPLOAD_FOLDER = "static/uploads/qrcode_files"
+upload_folder = os.environ.get("UPLOAD_FOLDER")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
 
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+#app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
 def allowed_file(filename):
@@ -266,8 +275,8 @@ def get_qrcode_id_from_file(file_path):
     detector = cv2.QRCodeDetector()
     # Detect the QR code in the image
     data, bbox, straight_qrcode = detector.detectAndDecode(img)
-    print(data)
-    return data
+    qrcode_id = data.strip().split("/")[-1]  # Extract the qrcode_id from the data
+    return qrcode_id
 
 
 @app.route("/scan_qr_code", methods=["POST"])
@@ -282,7 +291,7 @@ def scan_qr_code():
 
     if qr_code_file and allowed_file(qr_code_file.filename):
         filename = secure_filename(qr_code_file.filename)
-        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file_path = os.path.join(upload_folder, filename)
         qr_code_file.save(file_path)
 
         qrcode_id = get_qrcode_id_from_file(file_path)
@@ -294,16 +303,43 @@ def scan_qr_code():
 
         if intern_data:
             # QR code found in the database, return the response
-            response = render_template("response.html", intern_data=intern_data)
+            response = render_template("response.html", intern_data=intern_data, qrcore_id=qrcode_id)
+            os.remove(file_path)
             return response
+
         else:
+            os.remove(file_path)
             return jsonify({"error": "QR code not found in the database"})
+
 
     return jsonify({"error": "Invalid request"})
 
 
+@app.route("/redirect_qrcode_scan/<qrcode_id>", methods=["GET"])
+def redirect_qrcode_scan(qrcode_id):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM interns WHERE qrcode_id = %s", [qrcode_id])
+    intern_data = cur.fetchone()
+    cur.close()
 
+    if intern_data:
+        # QR code found in the database, store the intern data in session with a unique identifier
+        session[qrcode_id] = intern_data
+        return redirect(url_for("experience_letter", qrcode_id=qrcode_id))
+    else:
+        return jsonify({"error": "QR code not found in the database"})
+
+
+@app.route("/experience-letter/<qrcode_id>", methods=["GET"])
+def experience_letter(qrcode_id):
+    intern_data = session.get(qrcode_id)
+
+    if intern_data:
+        # Process the intern data and render the experience letter template
+        return render_template("expletter.html", intern_data=intern_data)
+    else:
+        return jsonify({"error": "Intern data not found"})
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")

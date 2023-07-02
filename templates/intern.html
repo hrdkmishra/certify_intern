@@ -36,6 +36,13 @@
     <p><strong>Email:</strong> {{ intern[6] }}</p>
     <p><strong>Start Date:</strong> {{ intern[7] }}</p>
     <p><strong>End Date:</strong> {{ intern[8] }}</p>
+    <p>
+      <strong>URL:</strong>
+{#      <a href="{{ app_url }}/redirect_qrcode_scan/{{ intern[9] }}"#}
+{#        >experience letter</a#}
+{#      >#}
+        <a href="/redirect_qrcode_scan/{{ intern[9] }}">experience letter</a>
+    </p>
     <img
       src="{{ url_for('static', filename='qr_codes/' + intern[9] + '.png') }}"
       alt="QR Code"
