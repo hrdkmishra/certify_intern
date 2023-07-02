@@ -38,8 +38,8 @@
     <p><strong>End Date:</strong> {{ intern[8] }}</p>
     <p>
       <strong>URL:</strong>
-{#      <a href="{{ app_url }}/redirect_qrcode_scan/{{ intern[9] }}">experience letter</a>#}
-        <a href="/redirect_qrcode_scan/{{ intern[9] }}">experience letter</a>
+{#      <a href="{{ app_url }}/experience_letter/{{ intern[9] }}">experience letter</a>#}
+        <a href="/experience_letter/{{ intern[9] }}">experience letter</a>
     </p>
     <img
       src="{{ url_for('static', filename='qr_codes/' + intern[9] + '.png') }}"

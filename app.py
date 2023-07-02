@@ -173,7 +173,7 @@ def profile():
 
 def generateQrcode(qrcode_id):
     # Generate QR code image
-    url = f"127.0.0.1/redirect_qrcode_scan/{qrcode_id}"
+    url = f"http://127.0.0.1:5000/experience_letter/{qrcode_id}" # app_url issue
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(url)
     qr.make(fit=True)
@@ -209,7 +209,7 @@ def intern():
 
         # Generate a unique QR code ID
         qrcode_id = str(uuid.uuid4())
-        print("http://:5000/redirect_qrcode_scan/" + qrcode_id)
+        print("http://127.0.0.1:5000/experience_letter/" + qrcode_id) #app_url issue
 
         # Generate QR code and save it
         generateQrcode(qrcode_id)
@@ -275,6 +275,7 @@ def get_qrcode_id_from_file(file_path):
     detector = cv2.QRCodeDetector()
     # Detect the QR code in the image
     data, bbox, straight_qrcode = detector.detectAndDecode(img)
+    print(data)
     qrcode_id = data.strip().split("/")[-1]  # Extract the qrcode_id from the data
     return qrcode_id
 
@@ -303,7 +304,7 @@ def scan_qr_code():
 
         if intern_data:
             # QR code found in the database, return the response
-            response = render_template("response.html", intern_data=intern_data, qrcore_id=qrcode_id)
+            response = render_template("response.html", intern_data=intern_data, qrcode_id=qrcode_id)
             os.remove(file_path)
             return response
 
@@ -315,7 +316,33 @@ def scan_qr_code():
     return jsonify({"error": "Invalid request"})
 
 
-@app.route("/redirect_qrcode_scan/<qrcode_id>", methods=["GET"])
+# @app.route("/redirect_qrcode_scan/<qrcode_id>", methods=["GET"])
+# def redirect_qrcode_scan(qrcode_id):
+#     cur = mysql.connection.cursor()
+#     cur.execute("SELECT * FROM interns WHERE qrcode_id = %s", [qrcode_id])
+#     intern_data = cur.fetchone()
+#     cur.close()
+#
+#     if intern_data:
+#         # QR code found in the database, store the intern data in session with a unique identifier
+#         session[qrcode_id] = intern_data
+#         return redirect(url_for("experience_letter", qrcode_id=qrcode_id))
+#     else:
+#         return jsonify({"error": "QR code not found in the database"})
+
+
+# @app.route("/experience-letter/<qrcode_id>", methods=["GET"]) # i dont even need this
+# def experience_letter(qrcode_id):
+#     intern_data = session.get(qrcode_id)
+#
+#     if intern_data:
+#         # Process the intern data and render the experience letter template
+#         return render_template("expletter.html", intern_data=intern_data)
+#     else:
+#         return jsonify({"error": "Intern data not found"})
+
+
+@app.route("/experience_letter/<qrcode_id>", methods=["GET"])
 def redirect_qrcode_scan(qrcode_id):
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM interns WHERE qrcode_id = %s", [qrcode_id])
@@ -323,22 +350,10 @@ def redirect_qrcode_scan(qrcode_id):
     cur.close()
 
     if intern_data:
-        # QR code found in the database, store the intern data in session with a unique identifier
-        session[qrcode_id] = intern_data
-        return redirect(url_for("experience_letter", qrcode_id=qrcode_id))
-    else:
-        return jsonify({"error": "QR code not found in the database"})
-
-
-@app.route("/experience-letter/<qrcode_id>", methods=["GET"])
-def experience_letter(qrcode_id):
-    intern_data = session.get(qrcode_id)
-
-    if intern_data:
         # Process the intern data and render the experience letter template
         return render_template("expletter.html", intern_data=intern_data)
     else:
-        return jsonify({"error": "Intern data not found"})
+        return jsonify({"error": "QR code not found in the database"})
 
 
 
