@@ -2,11 +2,9 @@
 
 # problem of my project 
 
-- [ ] `session['company']` is not working in `def profile` in `app.py` file
-- [ ] unable to retrieve data from `session['company']` in `profile.html` file
 - [ ] need to add `CRUD` functionality in `app.py` file for all changes
 - [ ] input validation for all forms data
+- [ ] need to create a attractive experience letter template with qr code placement and should be downloadable + .pdf
 
 # functionality to add
-- [ ] need to add a qrcode reader in `index.html` file to verify upload doc qrcode and retrieve the data
 - [ ] eye-cancer css 
